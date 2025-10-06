@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather App — ES6+ Async JS</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #74ebd5, #acb6e5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 350px;
+    }
+    h2 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    input {
+      padding: 10px;
+      width: 80%;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #0078ff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin-top: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background-color: #005fcc;
+    }
+    .weather-result {
+      margin-top: 20px;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🌤️ Weather App</h2>
+    <input type="text" id="cityInput" placeholder="Enter city name" />
+    <br />
+    <button id="getWeatherBtn">Get Weather</button>
+    <p class="error" id="error"></p>
+
+    <div class="weather-result" id="weatherResult"></div>
+  </div>
+
+  <script>
+    const apiKey = "https://api.open-meteo.com/v1/forecast"; // free API (no key needed)
+    const cityInput = document.getElementById("cityInput");
+    const getWeatherBtn = document.getElementById("getWeatherBtn");
+    const weatherResult = document.getElementById("weatherResult");
+    const errorMsg = document.getElementById("error");
+
+    // Function to fetch latitude and longitude for a city using Open-Meteo Geocoding API
+    async function getCoordinates(city) {
+      const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${city}`;
+      const res = await fetch(geoUrl);
+      if (!res.ok) throw new Error("City not found");
+      const data = await res.json();
+      if (!data.results || data.results.length === 0) throw new Error("Invalid city");
+      const { latitude, longitude, name, country } = data.results[0];
+      return { latitude, longitude, name, country };
+    }
+
+    // Fetch weather using latitude and longitude
+    async function getWeather(city) {
+      try {
+        errorMsg.textContent = "";
+        weatherResult.innerHTML = "<p>Loading...</p>";
+
+        const { latitude, longitude, name, country } = await getCoordinates(city);
+        const weatherUrl = `${apiKey}?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
+        const response = await fetch(weatherUrl);
+        if (!response.ok) throw new Error("Weather data not found");
+        const data = await response.json();
+
+        const { temperature, windspeed, weathercode } = data.current_weather;
+
+        weatherResult.innerHTML = `
+          <h3>${name}, ${country}</h3>
+          <p>🌡️ Temperature: ${temperature}°C</p>
+          <p>💨 Wind Speed: ${windspeed} km/h</p>
+          <p>☁️ Weather Code: ${weathercode}</p>
+        `;
+
+        // Save last searched city to localStorage
+        localStorage.setItem("lastCity", city);
+      } catch (error) {
+        weatherResult.innerHTML = "";
+        errorMsg.textContent = error.message;
+      }
+    }
+
+    // Handle button click
+    getWeatherBtn.addEventListener("click", () => {
+      const city = cityInput.value.trim();
+      if (city === "") {
+        errorMsg.textContent = "Please enter a city name!";
+        return;
+      }
+      getWeather(city);
+    });
+
+    // On page load — check localStorage
+    window.addEventListener("load", () => {
+      const lastCity = localStorage.getItem("lastCity");
+      if (lastCity) {
+        cityInput.value = lastCity;
+        getWeather(lastCity);
+      }
+    });
+  </script>
+</body>
+</html>

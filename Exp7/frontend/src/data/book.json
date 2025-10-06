@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "title": "JavaScript: The Good Parts",
+    "author": "Douglas Crockford",
+    "price": 499,
+    "availability": "In Stock"
+  },
+  {
+    "id": 2,
+    "title": "Eloquent JavaScript",
+    "author": "Marijn Haverbeke",
+    "price": 599,
+    "availability": "In Stock"
+  },
+  {
+    "id": 3,
+    "title": "You Don’t Know JS",
+    "author": "Kyle Simpson",
+    "price": 399,
+    "availability": "Out of Stock"
+  },
+  {
+    "id": 4,
+    "title": "Learning React",
+    "author": "Alex Banks & Eve Porcello",
+    "price": 699,
+    "availability": "In Stock"
+  }
+]
